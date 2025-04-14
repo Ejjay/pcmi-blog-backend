@@ -32,13 +32,28 @@ app.use(
   })
 );
 
-// Debug logging middleware
+// New logging middleware with timestamp
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] Backend received request: ${req.method} ${req.url}`);
+  next();
+});
+
+// Existing debug logging middleware
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   next();
 });
 
-// Test endpoint
+// Test endpoint for connectivity check (/api/connection-test)
+app.get("/api/connection-test", (req, res) => {
+  console.log("Connection test endpoint hit by client");
+  return res.status(200).json({ 
+    message: "Backend connection successful", 
+    timestamp: new Date().toISOString() 
+  });
+});
+
+// Original test endpoint (if still needed)
 app.get("/test", (req, res) => {
   res.json({ message: "Server is working!" });
 });
@@ -90,15 +105,21 @@ app.use((error, req, res, next) => {
 
 // Start the server or connect to the database based on the environment
 if (process.env.NODE_ENV !== "production") {
-  // For local development, start the server and connect to the DB
   const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-    connectDB();
-    console.log(`Server is running on port ${PORT}`);
+  app.listen(PORT, async () => {
+    await connectDB();
+    console.log(`Backend server running on port ${PORT}`);
+    console.log(
+      `Backend ready to accept connections from client: ${process.env.CLIENT_URL || "http://localhost:5173"}`
+    );
   });
 } else {
-  // In production, simply connect to the database
-  connectDB();
+  connectDB().then(() => {
+    console.log("Backend connected to database in production mode");
+    console.log(
+      `Backend ready to accept connections from client: ${process.env.CLIENT_URL || "https://pcmi-blog-client.vercel.app"}`
+    );
+  });
 }
 
 // Export the Express app for Vercel serverless deployment
