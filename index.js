@@ -53,12 +53,18 @@ app.use(express.json());
 
 // Additional CORS headers (for broader compatibility)
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", process.env.CLIENT_URL || "http://localhost:5173");
+  res.header(
+    "Access-Control-Allow-Origin",
+    process.env.CLIENT_URL || "http://localhost:5173"
+  );
   res.header(
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
   );
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
   next();
 });
 
@@ -81,16 +87,18 @@ app.use((error, req, res, next) => {
   });
 });
 
-// Connect to the database (this will run regardless of environment)
-connectDB();
-
-// For local development – start the server when not in production
+// Start the server or connect to the database based on the environment
 if (process.env.NODE_ENV !== "production") {
+  // For local development, start the server and connect to the DB
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
+    connectDB();
     console.log(`Server is running on port ${PORT}`);
   });
+} else {
+  // In production, simply connect to the database
+  connectDB();
 }
 
 // Export the Express app for Vercel serverless deployment
-module.exports = app;
+export default app;
