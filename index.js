@@ -23,7 +23,8 @@ console.log("ImageKit URL Endpoint:", process.env.IMAGEKIT_URL_ENDPOINT);
 
 const app = express();
 
-// CORS configuration allowing your deployed client and local development
+// CORS configuration allowing your deployed client and local development.
+// Ensure that the CLIENT_URL environment variable is set to 'https://pcmi-blog-client.vercel.app' on Vercel.
 app.use(
   cors({
     origin: [process.env.CLIENT_URL || "http://localhost:5173"],
